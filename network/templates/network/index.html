@@ -1,0 +1,129 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+
+{% block body %}
+    {% block script %}
+        <script src="{% static 'network/javascript.js' %}"></script>
+        
+    {% endblock %}
+
+    <div id = "create-button" class="post_page">
+        <h1 >All Posts</h1>
+        <button id = "create-post" class="btn btn-primary">Add your Own Posts!</button>
+    </div>
+    
+    <div id = "compose-post" class="post_page">
+        <h1>New Post</h1>
+        {% if request.user.is_authenticated %}
+            <form id = "submit-post">
+                {% csrf_token %}
+                <input id="post-text" class="form-control" type="text" placeholder="Write what you want to post here!" style="margin-bottom: 5px;">
+                <input type = "submit" class="btn btn-primary"/>
+            </form>
+           
+            
+        {% else %}
+            <label style="font-weight: bold; font-size: 50px;" > Please sign in first!</label>
+            
+        {% endif %}
+    </div>
+
+    <div id = "following_post" class="post_page">
+        <h1 >Followed Posts</h1>
+        
+    </div>
+
+    <div id="profile-page" class="post_page">
+        <div class = "post_box" style="margin-top: 20px;">
+            <label style="font-weight: bold; font-size: 50px;" class="inside_post" id = 'profile-user'>{{ name }}</label>
+            <label  style="font-size: 20px;" class="inside_post" id="follower_count"> Followers: {{ profile_user.follower_amount }}</label>
+            <label  style="font-size: 20px;" class="inside_post" id="following_count"> Following: {{  profile_user.following_amount }}</label>
+            {% if profile_user != request.user %}
+                {% if request.user.is_authenticated %}
+                    {% if following == True %}
+                        <button style="max-width: 100px; margin-bottom: 10px;" class="btn btn-primary inside_post" id="follow_button" >Unfollow!</button>
+                    {% else %}
+                        <button style="max-width: 100px; margin-bottom: 10px;" class="btn btn-primary inside_post" id="follow_button" >Follow!</button>
+                    {% endif %}
+
+                {% else %}
+                    <label class="inside_post" style="font-weight: bold; font-size: 30px;" > You must sign in first to follow this user.</label>
+
+                {% endif %}
+            {% endif %}     
+        </div>
+    </div>
+
+    <div id="edit-post" class="post_page" >
+        <h1>Editing</h1>
+
+        <form id = "post_edit">
+            {% csrf_token %}
+            
+            <input type = "submit" class="btn btn-primary" id ='submit-edit-button'/>
+        </form>
+    </div>
+
+    <div id = 'post-view' class="post_page">        
+        {% for post in page_obj%}
+        <div class = "post_box font-control" style="margin-top: 20px;" id = 'post_display'>
+            <a class="inside_post" href="{% url 'profile' name=post.user %}" style="font-weight: bold; margin-top: 10px;">{{ post.user }}</a>
+            {% if request.user == post.user %}
+                <button style="max-width: 40px; max-height: 25px; padding: 0px;" class="btn btn-primary inside_post" id="edit-button" data-post-id="{{ post.id }}" >Edit</button>
+            {% endif %}
+
+            
+            <label class="gray_items inside_post"> {{ post.timestamp }}</label>
+
+            <label class="inside_post"> {{ post.post_text }}</label>
+           
+            <div>
+                {% if request.user.is_authenticated %}
+                    <span id="heart_button" style="font-size: 30px; color: rgb(117, 112, 112);" class="inside_post" data-like-post-id="{{ post.id }}" >&#9829;</span>
+                {% endif %}
+                <label style="position: relative; top: -5px;" class="gray_items inside_post" id="like_counter" > Likes: {{ post.likes }}</label>
+            </div>
+            
+            <label style="width: 80px;" class="gray_items inside_post" data-comment-post-id="{{ post.id }}" id="post-comment-button">Comment</label>
+             
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination inside_post">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+    
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+     
+    <div id="comment-page" class="post_page">
+        <div id="comment_post_view"></div>
+
+        <form id = "comment-submit">
+            {% csrf_token %}
+            
+            <input type = "submit" class="btn btn-primary" id ='submit-comment-button' value="Add Comment"/>
+        </form>
+
+    </div>
+
+
+{% endblock %}
+
+
+
+
+
